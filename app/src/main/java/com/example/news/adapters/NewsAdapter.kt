@@ -31,13 +31,14 @@ class NewsAdapter: RecyclerView.Adapter<NewsAdapter.ArticleViewHolder>() {
     // class which contains links to every view of single RV item
     // when a new item appears, this class is created, through this class we get access to all the item's views
     class ArticleViewHolder(item: View): RecyclerView.ViewHolder(item) {
-        val binding = ItemArticlePreviewBinding.bind(item)
-        fun bind(article: Article) = with(binding) {
+        private val binding = ItemArticlePreviewBinding.bind(item)
+        fun bind(article: Article, clickListener: ((Article) -> Unit)? ) = with(binding) {
             Glide.with(itemView.context).load(article.urlToImage).into(ivArticleImage)
             tvSource.text = article.source.name
             tvTitle.text = article.title
             tvDescription.text = article.description
             tvPublishedAt.text = article.publishedAt
+            itemView.setOnClickListener { clickListener?.invoke(article) }
         }
     }
 
@@ -52,7 +53,7 @@ class NewsAdapter: RecyclerView.Adapter<NewsAdapter.ArticleViewHolder>() {
     }
 
     override fun onBindViewHolder(holder: ArticleViewHolder, position: Int) {
-        holder.bind(differ.currentList[position])
+        holder.bind(differ.currentList[position], onItemClickListener)
     }
 
     private var onItemClickListener: ((Article) -> Unit)? = null
