@@ -26,7 +26,7 @@ class NewsAdapter: RecyclerView.Adapter<NewsAdapter.ArticleViewHolder>() {
 
     // tool that will take two lists and compares them and calculates the differences
     // (AsyncListDiffer calls submitList, which calls differCallback)
-    private val differ = AsyncListDiffer(this, differCallback)
+    val differ = AsyncListDiffer(this, differCallback)
 
     // class which contains links to every view of single RV item
     // when a new item appears, this class is created, through this class we get access to all the item's views
