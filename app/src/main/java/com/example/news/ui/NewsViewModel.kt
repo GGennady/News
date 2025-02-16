@@ -14,12 +14,15 @@ class NewsViewModel(val newsRepository: NewsRepository): ViewModel() {
     val breakingNews: MutableLiveData<Resource<NewsResponse>> = MutableLiveData()
     var breakingNewsPage = 1 // 1 for test
 
+    val searchNews: MutableLiveData<Resource<NewsResponse>> = MutableLiveData()
+    var searchNewsPage = 1
+
     init {
         getBreakingNews("us")
     }
 
     // executes API from the repository
-    private fun getBreakingNews(countryCode: String) = viewModelScope.launch {
+    fun getBreakingNews(countryCode: String) = viewModelScope.launch {
         breakingNews.postValue(Resource.Loading()) // before the network call
 
         val response = newsRepository.getBreakingNews(countryCode, breakingNewsPage) // actual response
@@ -30,9 +33,25 @@ class NewsViewModel(val newsRepository: NewsRepository): ViewModel() {
         breakingNews.postValue(handleBreakingNewsResponse(response))
     }
 
-    // in this function we decide whether we want to omit the success state in breakingNews LivaData, or the error state
+    fun searchNews(searchQuery: String) = viewModelScope.launch {
+        searchNews.postValue(Resource.Loading())
+
+        val response = newsRepository.searchNews(searchQuery, searchNewsPage)
+
+        searchNews.postValue(handleSearchNewsResponse(response))
+    }
+
+    // in this function we decide whether we want to emit the success state in breakingNews LivaData, or the error state
     // if a response is successful - return Success state, if not - return Error state
     private fun handleBreakingNewsResponse(response: Response<NewsResponse>): Resource<NewsResponse> {
+        if (response.isSuccessful) {
+            // if the body of response is not equal to null
+            response.body()?.let { resultResponse -> return Resource.Success(resultResponse) }
+        }
+        return Resource.Error(response.message())
+    }
+
+    private fun handleSearchNewsResponse(response: Response<NewsResponse>): Resource<NewsResponse> {
         if (response.isSuccessful) {
             // if the body of response is not equal to null
             response.body()?.let { resultResponse -> return Resource.Success(resultResponse) }
