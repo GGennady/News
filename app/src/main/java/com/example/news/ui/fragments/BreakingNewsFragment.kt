@@ -7,7 +7,9 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.news.R
 import com.example.news.Resource
 import com.example.news.adapters.NewsAdapter
 import com.example.news.databinding.FragmentBreakingNewsBinding
@@ -34,6 +36,13 @@ class BreakingNewsFragment: Fragment() {
         viewModel = (activity as NewsActivity).viewModel
 
         setupRecyclerView()
+
+        newsAdapter.setOnItemClickListener {
+            val bundle = Bundle().apply {
+                putSerializable("article", it)
+            }
+            findNavController().navigate(R.id.action_breakingNewsFragment_to_articleFragment, bundle)
+        }
 
         // subscribe to all the changes regarding their LiveData
         // whenever we get new breakingNews, then this observer will be called...
