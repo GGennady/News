@@ -14,7 +14,7 @@ interface ArticleDao {
     // update or insert: insert a new article; if it is already in the database, it will update it instead and replace it
     // returns a Long, which is the ID that was inserted
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun upsert(article: Article): Long
+    suspend fun upsertArticle(article: Article): Long
 
     @Query("SELECT * FROM articles")
     fun getAllArticles(): LiveData<List<Article>>
