@@ -21,8 +21,8 @@ data class Article(
 ): Serializable {
 
     override fun hashCode(): Int {
-        var result = id?.hashCode() ?: 0 // Безопасная обработка null
-        result = 31 * result + (url.hashCode()) // Безопасная обработка null
+        var result = id?.hashCode() ?: 0 // Safe null handling
+        result = 31 * result + (url.hashCode()) // Safe null handling
         return result
     }
 

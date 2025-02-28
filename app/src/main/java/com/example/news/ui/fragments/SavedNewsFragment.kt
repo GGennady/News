@@ -92,4 +92,9 @@ class SavedNewsFragment : Fragment() {
             layoutManager = LinearLayoutManager(activity)
         }
     }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
 }

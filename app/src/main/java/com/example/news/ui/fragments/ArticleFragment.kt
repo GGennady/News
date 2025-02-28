@@ -43,4 +43,9 @@ class ArticleFragment: Fragment() {
             Snackbar.make(view, "Article saved successfully.", Snackbar.LENGTH_SHORT).show()
         }
     }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
 }

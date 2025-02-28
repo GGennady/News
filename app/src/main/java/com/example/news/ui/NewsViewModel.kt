@@ -14,9 +14,11 @@ class NewsViewModel(val newsRepository: NewsRepository): ViewModel() {
 
     val breakingNews: MutableLiveData<Resource<NewsResponse>> = MutableLiveData()
     var breakingNewsPage = 1 // 1 for test
+    var breakingNewsResponse: NewsResponse? = null
 
     val searchNews: MutableLiveData<Resource<NewsResponse>> = MutableLiveData()
     var searchNewsPage = 1
+    var searchNewsResponse: NewsResponse? = null
 
     init {
         getBreakingNews("us")
@@ -28,7 +30,7 @@ class NewsViewModel(val newsRepository: NewsRepository): ViewModel() {
 
         val response = newsRepository.getBreakingNews(countryCode, breakingNewsPage) // actual response
 
-        // when 21 line is finished, the coroutine will just continue with the next line, and here
+        // when prev line is finished, the coroutine will just continue with the next line, and here
         // there must be confidence that current network response is saved in "val response"
         // in this case response can be handled (and for that there is separate function - handleBreakingNewsResponse
         breakingNews.postValue(handleBreakingNewsResponse(response))
@@ -47,15 +49,43 @@ class NewsViewModel(val newsRepository: NewsRepository): ViewModel() {
     private fun handleBreakingNewsResponse(response: Response<NewsResponse>): Resource<NewsResponse> {
         if (response.isSuccessful) {
             // if the body of response is not equal to null
-            response.body()?.let { resultResponse -> return Resource.Success(resultResponse) }
+            response.body()?.let { resultResponse ->
+                // when we get that successful response, the first thing we want to do is...
+                // ...increase current page number to be able to load the next page after that
+                breakingNewsPage++
+
+                // since breakingNewsResponse = null initially, we want to set it when we get the first response
+                if(breakingNewsResponse == null) {
+                    breakingNewsResponse = resultResponse
+                } else {
+                    // if that's not the first page == if breakingNewsResponse already has been set then...
+                    // ...we instead want to take new response (resultResponse), take its "articles", and...
+                    // ...add all of them to our articles of "breakingNewsResponse" so to the response that is already saved in viewModel
+                    val oldArticles = breakingNewsResponse?.articles
+                    val newArticles = resultResponse.articles
+                    oldArticles?.addAll(newArticles)
+                }
+                return Resource.Success(breakingNewsResponse ?: resultResponse)
+            }
         }
         return Resource.Error(response.message())
     }
 
     private fun handleSearchNewsResponse(response: Response<NewsResponse>): Resource<NewsResponse> {
         if (response.isSuccessful) {
-            // if the body of response is not equal to null
-            response.body()?.let { resultResponse -> return Resource.Success(resultResponse) }
+            response.body()?.let { resultResponse ->
+
+                searchNewsPage++
+                
+                if(searchNewsResponse == null) {
+                    searchNewsResponse = resultResponse
+                } else {
+                    val oldArticles = searchNewsResponse?.articles
+                    val newArticles = resultResponse.articles
+                    oldArticles?.addAll(newArticles)
+                }
+                return Resource.Success(searchNewsResponse ?: resultResponse)
+            }
         }
         return Resource.Error(response.message())
     }
