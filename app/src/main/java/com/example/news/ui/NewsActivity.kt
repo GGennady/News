@@ -1,6 +1,8 @@
 package com.example.news.ui
 
+import android.app.Service
 import android.os.Bundle
+import android.provider.DocumentsContract.Root
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
@@ -27,10 +29,9 @@ class NewsActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         val newsRepository = NewsRepository(ArticleDatabase(this))
-        val viewModelProviderFactory = NewsViewModelProviderFactory(newsRepository)
+        val viewModelProviderFactory = NewsViewModelProviderFactory(application, newsRepository)
 
         viewModel = ViewModelProvider(this, viewModelProviderFactory)[NewsViewModel::class.java]
-
         val navController by lazy {
             val navHostFragment = supportFragmentManager.findFragmentById(R.id.newsNavHostFragment) as NavHostFragment
             navHostFragment.navController
